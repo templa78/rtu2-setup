@@ -5,8 +5,7 @@ set -ex
 ## chroot 환경 내에서 실행되어야 한다
 # /dev, /proc 등이 이미 마운트되어 있어야 한다.
 
-# 패키지 설치
-apt-get install -y netplan.io
+cp misc/90-only-loopback-ipv6.conf /etc/sysctl.d/
 
 mkdir -p /etc/netplan
 rm -rf /etc/netplan/*

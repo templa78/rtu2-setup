@@ -5,13 +5,13 @@ set -ex
 # TODO
 #wg genkey | tee /etc/wireguard/rtu.key | wg pubkey | tee /etc/wireguard/rtu.pub
 #chmod 600 /etc/wireguard/rtu.key
-RTU_IPADDR= #10.123.0.1
-RTU_KEY=
+RTU_VPN_IP= #10.123.0.1
+RTU_VPN_KEY=
 
 cat > /etc/wireguard/wg0.conf <<EOF
 [Interface]
-Address = $RTU_IPADDR/16
-PrivateKey = $RTU_KEY
+Address = $RTU_VPN_IP/16
+PrivateKey = $RTU_PVN_KEY
 DNS = 8.8.8.8
 
 [Peer]
@@ -21,7 +21,7 @@ Endpoint = 43.200.249.199:51820
 PersistentKeepalive = 25
 EOF
 
-systemctl enable wg-quick@wg0
+systemctl enable --now wg-quick@wg0
 
 #연결
 #wg-quick up wg0

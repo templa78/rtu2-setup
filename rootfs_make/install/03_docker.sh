@@ -35,7 +35,9 @@ mkdir -p /iderms/docker
 mkdir -p ~/.config/systemd/user/docker.service.d
 cat > ~/.config/systemd/user/docker.service.d/override.conf <<EOF1
 [Service]
-export ROOTLESSKIT_NET=pasta
+Environment="DOCKERD_ROOTLESS_ROOTLESSKIT_NET=pasta"
+Environment="DOCKERD_ROOTLESS_ROOTLESSKIT_PORT_DRIVER=implicit"
+Environment="DOCKERD_ROOTLESS_ROOTLESSKIT_DISABLE_HOST_LOOPBACK=false"
 EOF1
 
 # 데몬 설정(daemon.json)

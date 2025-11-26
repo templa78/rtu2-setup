@@ -16,7 +16,7 @@ tar -xzf ubuntu_base_24.04.3-arm64.tar.gz -C ${TARGET_DIR}
 cp -a ../images/kernel/* ${TARGET_DIR}/
 cp -a ../images/firmware ${TARGET_DIR}/usr/lib/
 cp -a ../images/opt ${TARGET_DIR}/
-#cp -a crzfs/* ${TARGET_DIR}/
+cp -a idermsfs/* ${TARGET_DIR}/
 
 ###################################
 # chroot 로 계정, 패키지들 설치한다

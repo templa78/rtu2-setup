@@ -15,12 +15,12 @@ apt-get -y upgrade
 apt-get install -y systemd systemd-sysv udev kmod
 
 # 반드시 필요 (구성)
-apt-get install -y iproute2 gpiod sudo wireguard openssh-server logrotate
+apt-get install -y netplan.io iproute2 gpiod sudo wireguard openssh-server logrotate
 apt-get install -y iptables libxtables12 ufw
 
 # 편의사항
 apt-get install -y vim netcat-openbsd iputils-ping 
-
+setcap cap_net_raw+ep /usr/bin/ping
 
 # security option
 mkdir -p /etc/profile.d
@@ -62,6 +62,13 @@ useradd -m -U -s /bin/bash --skel /dev/null -K UMASK=077 rtu
 groupadd gpio
 usermod -aG dialout,gpio iderms
 
+# vimrc 설정
+cp misc/vimrc /home/iderms/.vimrc
+chown iderms:iderms /home/iderms/.vimrc
+cp misc/vimrc /home/rtu/.vimrc
+chown rtu:rtu /home/rtu/.vimrc
+cp misc/vimrc /root/.vimrc
+
 mkdir -p /etc/sudoers.d
 cat > /etc/sudoers.d/rtu-sudoers <<EOF
 rtu ALL=(ALL) NOPASSWD:ALL
@@ -69,4 +76,16 @@ EOF
 
 # linger 활성화 (로그인 없이도 사용자 systemd 서비스 실행 허용)
 loginctl enable-linger iderms
+
+##### TODO ########
+## 아래 삭제해야 함
+###################
+#passwd rtu <<EOF
+#Dlszhdjem_edev
+#Dlszhdjem_edev
+#EOF
+#
+# 나중에 다음 실행해서 제거해야함
+#usermod -p '!' rtu
+#
 
