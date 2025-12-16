@@ -6,10 +6,9 @@ echo ""
 echo "###   fuse uboot   ###"
 echo ""
 
-BASE_DIR=/work/images/uboots
-SRC_DIR=${BASE_DIR}/uboot_org
+SRC_DIR=./uboot
 if [ $# -gt 0 ]; then
-    SRC_DIR=${BASE_DIR}/$1
+    SRC_DIR=$1
 fi
 
 echo 0 > /sys/block/mmcblk0boot0/force_ro

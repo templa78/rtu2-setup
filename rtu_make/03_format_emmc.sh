@@ -2,10 +2,6 @@
 
 set -euxo pipefail
 
-#g3k 관련 => 최소 한 번은 수행되어야 한다.
-#g3k_init || true
-#g3k_setrtc || true
-
 TARGET_DEV=/dev/mmcblk0
 TARGET_PART1=${TARGET_DEV}p1
 TARGET_PART2=${TARGET_DEV}p2
@@ -31,18 +27,7 @@ cryptsetup open ${TARGET_PART2} cryptroot  --key-file /work/scripts/keys/luks_ma
 # 내부에 ext4 생성
 mkfs.ext4 -F -L RTU-CRYPT /dev/mapper/cryptroot
 
-##################
-# 이미지 복사
-mkdir -p /media
-mount ${TARGET_PART1} /media
-cp -a /work/images/fitImages/dist/fitImage /media/
-sync
-umount /media
-
-mkdir -p /mnt
-mount /dev/mapper/cryptroot /mnt
-tar -xzf rootfs.tar.gz -C /mnt/
-sync
-umount /mnt
+sleep 3
 
 cryptsetup close cryptroot
+
