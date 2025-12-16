@@ -4,11 +4,13 @@ set -euxo pipefail
 
 TARGET_DIR=rootfs
 if [ $# -gt 0 ]; then
-	TARGET_DIR=$1
+    TARGET_DIR=$1
 fi
 
+rm -rf ${TARGET_DIR}/boot
 rm -rf ${TARGET_DIR}/home/*/.bash_history
 rm -rf ${TARGET_DIR}/root/.bash_history
+rmdir ${TARGET_DIR}/*.usr-is-merged
 
 rm -rf ${TARGET_DIR}/var/cache
 rm -rf ${TARGET_DIR}/var/crash

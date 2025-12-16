@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 ## Download STM32 image
 RST_GPIO=9                  # STM32 리셋 핀 제어용 GPIO 번호
 BOOT0_GPIO=10               # STM32 BOOT0 핀 제어용 GPIO 번호

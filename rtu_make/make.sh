@@ -2,15 +2,17 @@
 
 set -euxo pipefail
 
-g3k_init || true
+#g3k 관련 => 최소 한 번은 수행되어야 한다.
+#g3k_init || true
+#g3k_setrtc || true
 
 TARGET_DEV=/dev/mmcblk0
 TARGET_PART1=${TARGET_DEV}p1
 TARGET_PART2=${TARGET_DEV}p2
 
 # GPT 생성 및 파티션
-sgdisk -Z ${TARGET_DEV}
-sgdisk -o ${TARGET_DEV}
+sgdisk --zap-all ${TARGET_DEV}
+sgdisk --clear ${TARGET_DEV}
 sgdisk -n 1:4MiB:+204MiB -t 1:8300 -c 1:"RTU-BOOT" ${TARGET_DEV}
 sgdisk -n 2:0:0          -t 2:8300 -c 2:"RTU-CRYPT" ${TARGET_DEV}
 
@@ -21,7 +23,7 @@ mkfs.ext4 -F -L RTU-BOOT ${TARGET_PART1}
 cryptsetup luksFormat --batch-mode --type luks2 ${TARGET_PART2} --key-file /work/scripts/keys/luks_master.key
 
 # 자체 키 등록
-g3k_util read 50 | cryptsetup luksAddKey --key-file=/work/scripts/keys/luks_master.key ${TARGET_PART2}
+g3k_util read 50 | cryptsetup luksAddKey --key-file=/work/scripts/keys/luks_master.key ${TARGET_PART2} --new-keyfile=-
 
 # 열기 (매핑명: cryptroot)
 cryptsetup open ${TARGET_PART2} cryptroot  --key-file /work/scripts/keys/luks_master.key
@@ -31,13 +33,15 @@ mkfs.ext4 -F -L RTU-CRYPT /dev/mapper/cryptroot
 
 ##################
 # 이미지 복사
+mkdir -p /media
 mount ${TARGET_PART1} /media
-rsync -av rootfs/boot/ /media/
+cp -a /work/images/fitImages/dist/fitImage /media/
 sync
 umount /media
 
+mkdir -p /mnt
 mount /dev/mapper/cryptroot /mnt
-rsync -av --exclude 'boot/' rootfs/ /mnt/
+tar -xzf rootfs.tar.gz -C /mnt/
 sync
 umount /mnt
 

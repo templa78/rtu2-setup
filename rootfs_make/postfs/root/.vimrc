@@ -27,6 +27,7 @@ set statusline=\ %<%l:%v\ [%P]%=%a\ %h%m%r\ %F\
 set encoding=utf-8
 set termencoding=utf-8
 set fileencoding=utf-8
+"set fileformats=unix,dos
 set nobomb
 
 " 마지막으로 수정된 곳에 커서를 위치함

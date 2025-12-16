@@ -2,7 +2,9 @@
 
 set -euxo pipefail
 
+# g3k 설정
 #g3k_init || true
+#/usr/local/sbin/g3k_setrtc
 
 TARGET_DEV=/dev/mmcblk0
 TARGET_PART1=${TARGET_DEV}p1
@@ -18,6 +20,8 @@ mkfs.ext4 -F   -L RTU-ROOT   ${TARGET_PART1}
 ##################
 # 이미지 복사
 mount ${TARGET_PART1} /mnt
-rsync -av rootfs/ /mnt/
+#rsync -av rootfs/ /mnt/
+tar -xzf ../rootfs_make/rootfs_inst.tar.gz -C /mnt/
 sync
 umount /mnt
+

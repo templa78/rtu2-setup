@@ -20,10 +20,5 @@ rmdir /mnt/boot
 ../scripts/umount_sub.sh /mnt
 ../scripts/close_crypt_dev.sh
 
-mount /dev/mmcblk0p1 /mnt
-cp -a ./initrds/${TARGET}/g3k_luks /mnt/
-ls -al /mnt
-umount /mnt
-
 sync
 sleep 1
