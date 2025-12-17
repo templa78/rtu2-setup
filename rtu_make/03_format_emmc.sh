@@ -17,17 +17,19 @@ mkfs.ext4 -F -L RTU-BOOT ${TARGET_PART1}
 
 # LUKS2로 포맷 (관리용 패스프레이즈)
 cryptsetup luksFormat --batch-mode --type luks2 ${TARGET_PART2} --key-file /work/scripts/keys/luks_master.key
+sleep 1
 
 # 자체 키 등록
 g3k_util read 50 | cryptsetup luksAddKey --key-file=/work/scripts/keys/luks_master.key ${TARGET_PART2} --new-keyfile=-
+sleep 1
 
 # 열기 (매핑명: cryptroot)
 cryptsetup open ${TARGET_PART2} cryptroot  --key-file /work/scripts/keys/luks_master.key
+sleep 1
 
 # 내부에 ext4 생성
 mkfs.ext4 -F -L RTU-CRYPT /dev/mapper/cryptroot
-
-sleep 3
+sleep 1
 
 cryptsetup close cryptroot
 

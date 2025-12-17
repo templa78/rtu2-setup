@@ -5,6 +5,27 @@ set -ex
 ## chroot 환경 내에서 실행되어야 한다
 # /dev, /proc 등이 이미 마운트되어 있어야 한다.
 
+# SSH
+cat > /etc/ssh/sshd_config <<EOF
+Port 8022
+AddressFamily inet
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+AllowUsers iderms rtu
+AuthenticationMethods publickey
+PubkeyAuthentication yes
+UsePAM yes
+PermitRootLogin no
+PermitEmptyPasswords no
+AuthorizedKeysFile none
+KbdInteractiveAuthentication no
+
+AcceptEnv LANG LC_*
+Subsystem sftp /usr/lib/openssh/sftp-server
+Include /etc/ssh/sshd_config.d/*
+EOF
+systemctl enable ssh.service
+
 # 밖으로 나가는 ping은 허용
 setcap cap_net_raw+ep /usr/bin/ping
 
@@ -20,6 +41,15 @@ net.ipv6.conf.lo.disable_ipv6=1
 # Also ignore router advertisements (extra safety)
 net.ipv6.conf.all.accept_ra=0
 net.ipv6.conf.default.accept_ra=0
+EOF
+
+mkdir -p /etc/systemd/network
+cat > /etc/systemd/network/10-usb0.link <<EOF
+[Match]
+Path=platform-xhci-hcd.4.auto-usb-0:1:1.0
+
+[Link]
+Name=usb0
 EOF
 
 mkdir -p /etc/netplan

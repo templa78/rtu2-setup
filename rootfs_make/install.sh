@@ -21,10 +21,10 @@ apt-get install -y systemd systemd-sysv udev kmod
 
 # 반드시 필요 (구성)
 apt-get install -y netplan.io iproute2 gpiod sudo wireguard openssh-server logrotate
-apt-get install -y iptables iptables-persistent
+apt-get install -y iptables iptables-persistent libcjson1
 
 # 편의사항
-apt-get install -y vim netcat-openbsd iputils-ping 
+apt-get install -y vim ncat iputils-ping 
 
 #####################
 # 타임존 설치 및 설정 (Asia/Seoul)

@@ -13,7 +13,10 @@ cryptsetup open ${TARGET_PART2} cryptroot  --key-file /work/scripts/keys/luks_ma
 # 이미지 복사
 mkdir -p /mnt
 mount /dev/mapper/cryptroot /mnt
-tar -xzf rootfs.tar.gz -C /mnt/
+cp -a sys_rootfs/* /mnt/
+#tar -xzf rootfs.tar.gz -C /mnt/
+#tar -xf rootfs.img -C /mnt/
+cp -a rootfs/* /mnt/
 sync
 umount /mnt
 

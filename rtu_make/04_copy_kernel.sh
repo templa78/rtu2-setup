@@ -9,6 +9,6 @@ TARGET_PART2=${TARGET_DEV}p2
 # 이미지 복사
 mkdir -p /media
 mount ${TARGET_PART1} /media
-cp -a fitImage /media/
+cp fitImage /media/
 sync
 umount /media

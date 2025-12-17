@@ -38,6 +38,8 @@ chroot ${TARGET_DIR} /tmp/config/04_docker.sh
 chroot ${TARGET_DIR} /tmp/config/05_mongo.sh
 chroot ${TARGET_DIR} /tmp/config/06_g3k.sh
 
+# ssh.socket 의 포트를 8022로 바꾼다.
+
 ../scripts/umount_sub.sh ${TARGET_DIR}
 
 # 필요없는 파일은 지운다.
