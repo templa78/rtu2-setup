@@ -1,0 +1,3 @@
+# UNCONFIGURED FSTAB FOR BASE SYSTEM
+/dev/mapper/cryptroot  /       ext4   defaults             0  1
+PARTLABEL=RTU-BOOT     /boot   ext4   defaults,ro,noload   0  2

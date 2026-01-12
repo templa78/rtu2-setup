@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+case $1 in
+  prereqs) prereqs; exit 0 ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+mkdir -p "${DESTDIR}/etc"
+cp -a /etc/initramfs-tools/hs_ebab795e-a7b7-4b53-acc0-66d9b6f26c1e "${DESTDIR}/etc/"
+
+copy_exec /lib/cryptsetup/scripts/g3k_luks

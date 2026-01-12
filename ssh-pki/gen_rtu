@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+## RTU_ID (예: F8001234)  를 인자로 받는다
+if [[ $# -eq 0 ]]; then
+  echo "Usage: gen_rtu <RTU_ID>"
+  exit
+fi
+
+RTU_ID="$1"
+WORK_DIR="${HOME}/.local/ssh/${RTU_ID}"
+
+PRIV="${WORK_DIR}/rtu"
+PRIV_CA="${PRIV}-ca"
+
+DATE=$(date +%Y-%m-%d)
+SERIAL=$(date +%Y%m%d%H%M%S)
+
+mkdir -p "${WORK_DIR}"
+
+if [[ -f "${PRIV_CA}" || -f "${PRIV}" ]]; then
+  echo "[-] private key already exists..." >&2
+  exit 1
+fi
+
+echo "[*] Generating ed25519 keys for rtu: ${RTU_ID}"
+ssh-keygen -q -t ed25519 -N "" -f "${PRIV_CA}" -C "${RTU_ID}-ca"
+ssh-keygen -q -t ed25519 -N "" -f "${PRIV}" -C "${RTU_ID}"
+
+chmod 600 "${PRIV_CA}" "${PRIV}"
+
+echo ""
+echo "##################################################"
+echo "RTU에서 (root권한으로) 아래 명령을 실행하세요."
+echo "--------------------------------------------------"
+echo ""
+echo "cat > /etc/ssh/rtu-ca.pub <<EOF"
+echo "$(cat ${PRIV_CA}.pub)"
+echo "EOF"
+echo ""
+echo "chmod 400 /etc/ssh/rtu-ca.pub"
+echo ""
+echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+echo ""

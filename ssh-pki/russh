@@ -1,0 +1,46 @@
+#!/bin/bash
+set -eu
+
+if [[ $# -lt 2 ]]; then
+  echo "Usage: russh <RTU_ID:F8001234> <RTU_USER:iderms/rtu> [ip:last if empty]"
+  exit 1
+fi
+
+RTU_ID=$1
+RTU_USER=$2
+
+WORK_DIR="${HOME}/.local/ssh/${RTU_ID}"
+PRIV_FILE="${WORK_DIR}/rtu"
+
+DATE=$(date +%Y-%m-%d)
+CERT_FILE="/tmp/rtu-ssh/${RTU_ID}/${RTU_USER}/cert_${DATE}.pub"
+IP_FILE="${WORK_DIR}/ip"
+
+if [[ $# -gt 2 ]]; then
+  RTU_IP=$3
+  printf "${RTU_IP}" > "${IP_FILE}"
+elif [[ -f "${IP_FILE}" ]]; then
+  RTU_IP=$(cat "${IP_FILE}")
+fi
+
+if [[ ! -n ${RTU_IP} ]]; then
+  echo "Fail: read ip"
+  exit 1
+fi
+
+if ! gen_token ${RTU_ID} ${RTU_USER}; then
+  echo "Fail: gen_token"
+  exit 1
+fi
+
+if [[ ! -f ${PRIV_FILE} ]]; then
+  echo "Fail : no priv file"
+  exit 1
+fi
+
+if [[ ! -f ${CERT_FILE} ]]; then
+  echo "Fail : no cert file"
+  exit 1
+fi
+
+exec ssh -p 8022 -i ${PRIV_FILE} -o CertificateFile=${CERT_FILE} ${RTU_USER}@${RTU_IP}

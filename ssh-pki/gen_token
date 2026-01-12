@@ -1,0 +1,49 @@
+#!/bin/bash
+set -eu
+
+## RTU_ID (예: F8001234), RTU_USER (예: iderms) 를 인자로 받는다
+if [[ $# -lt 2 ]]; then
+  echo "Usage: gen_token <RTU_ID:F8001234> <RTU_USER:iderms>"
+  exit 1
+fi
+
+RTU_ID="$1"
+RTU_USER="$2"
+
+WORK_DIR="${HOME}/.local/ssh/${RTU_ID}"
+DATE=$(date +%Y-%m-%d)
+SERIAL=$(date +%Y%m%d%H%M%S)
+
+TMP_CERT_DIR="/tmp/rtu-ssh/${RTU_ID}/${RTU_USER}"
+TMP_CERT="${TMP_CERT_DIR}/cert_${DATE}.pub"
+mkdir -p "${TMP_CERT_DIR}"
+if [[ -f "${TMP_CERT}" ]]; then
+  exit 0
+fi
+
+PRIV="${WORK_DIR}/rtu"
+PUB="${PRIV}.pub"
+CA_PRIV="${WORK_DIR}/rtu-ca"
+PRIV_CERT="${PRIV}-cert.pub"
+
+if [[ ! -f "${CA_PRIV}" ]]; then
+  echo "[-] rtu-CA private key not found: ${CA_PRIV}" >&2
+  exit 1
+fi
+
+echo "[*] Signing rtu pubkey with rtu-CA..."
+rm -f "${PRIV_CERT}" || true
+yes | ssh-keygen -q -N "" \
+  -s "${CA_PRIV}" \
+  -I "${RTU_ID}" \
+  -n "${RTU_USER}" \
+  -V "+24h" \
+  -z ${SERIAL} \
+  "${PUB}"
+
+chmod 600 "${PRIV_CERT}"
+
+rm -rf -- "${TMP_CERT_DIR}/"*
+mv "${PRIV_CERT}" "${TMP_CERT}"
+
+exit 0
