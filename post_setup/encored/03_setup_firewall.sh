@@ -16,6 +16,7 @@ cat > /etc/iptables/rules.v4 <<EOF
 -A INPUT -i wg0 -s 10.123.255.0/24 -p tcp --dport 8443 -j ACCEPT
 -A INPUT -i usb0 -s 10.176.72.210/32 -p tcp --dport 8022 -j ACCEPT
 -A INPUT -i usb0 -s 10.176.72.210/32 -p tcp --dport 8443 -j ACCEPT
+-A INPUT -i wg0 -p icmp --icmp-type echo-request -j ACCEPT
 -A OUTPUT -d 43.200.249.199/32 -p udp --dport 51820 -j ACCEPT
 -A OUTPUT -d 8.8.8.8/32 -p udp --dport 53 -j ACCEPT
 -A OUTPUT -d 8.8.8.8/32 -p tcp --dport 53 -j ACCEPT
@@ -61,6 +62,9 @@ cat > /etc/iptables.d/10-system.rules <<EOF
 # usb0 대역에서 들어오는 ssh, web 허용
 -A INPUT -i usb0 -s 10.176.72.210/32 -p tcp --dport 8022 -j ACCEPT
 -A INPUT -i usb0 -s 10.176.72.210/32 -p tcp --dport 8443 -j ACCEPT
+
+# wg0에서 들어오는 ping 허용
+-A INPUT -i wg0 -p icmp --icmp-type echo-request -j ACCEPT
 
 ###### OUTPUT #####
 # VPN

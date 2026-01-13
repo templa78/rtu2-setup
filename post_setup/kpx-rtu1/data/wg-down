@@ -1,0 +1,11 @@
+#!/bin/bash
+set -eu
+
+if [[ $# -eq 0 ]]; then
+  echo "usage: wg-down <ifname>"
+fi
+
+IF="${1}"
+
+# 인터페이스 삭제(주소/라우트도 같이 사라짐)
+ip link del dev "$IF" 2>/dev/null || true

@@ -1,0 +1,12 @@
+[Unit]
+Description=WireGuard via wireguard-go for %I
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=ENV_WG_PROCESS_FOREGROUND=1
+ExecStart=/usr/local/sbin/wg-up %i
+ExecStop=/usr/local/sbin/wg-down %i
+
+[Install]
+WantedBy=multi-user.target

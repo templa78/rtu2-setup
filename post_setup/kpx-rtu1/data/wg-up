@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if [[ $# -eq 0 ]]; then
+  echo "usage: wg-up <ifname>"
+fi
+
+IF="$1"
+CONF="/etc/wireguard/${IF}.conf"
+SOCK="/run/wireguard/${IF}.sock"
+
+# 기존 장치 제거 (재시작 대비)
+ip link del dev "$IF" 2>/dev/null
+
+# userspace backend 실행 (백그라운드, 출력 버림)
+wg-go "$IF" >/dev/null 2>&1 &
+sleep 0.5
+
+get() {
+  KEY="$1"
+  grep -m1 -E "^[[:space:]]*${KEY}[[:space:]]*=" "$CONF" \
+    | cut -d= -f2- \
+    | sed 's/^[[:space:]]*//; s/[[:space:]]*$//'
+}
+
+b64tohex() {
+  local B64="$1"
+  printf '%s' "$B64" | base64 -d 2>/dev/null | hexdump -v -e '/1 "%02x"'
+}
+
+ADDR="$(get Address)"
+LPORT="$(get ListenPort)"
+PRIV_HEX="$(b64tohex "$(get PrivateKey)")"
+PUB_HEX="$(b64tohex "$(get PublicKey)")"
+AIPS="$(get AllowedIPs)"
+EP="$(get Endpoint)"
+KA="$(get PersistentKeepalive)"
+
+cat <<EOF | sh -c "nc -U -q 0 \"$SOCK\""
+set=1
+private_key=$PRIV_HEX
+listen_port=$LPORT
+replace_peers=true
+public_key=$PUB_HEX
+endpoint=$EP
+persistent_keepalive_interval=$KA
+replace_allowed_ips=true
+allowed_ip=$AIPS
+
+EOF
+
+echo "====="
+echo "ADDR = [$ADDR]"
+echo "LPORT = [$LPORT]"
+echo "PRIV_HEX = [$PRIV_HEX]"
+echo "PUB_HEX = [$PUB_HEX]"
+echo "END_PT = [$EP]"
+echo "AIPS = [$AIPS]"
+echo "KEEP_ALIVE = [$KA]"
+echo "====="
+
+ip link set "$IF" up
+ip addr add "$ADDR" dev "$IF" 2>/dev/null || true
+ip route add "$AIPS" dev "$IF" 2>/dev/null || true

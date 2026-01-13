@@ -68,6 +68,6 @@ echo \
 
 apt-get update
 
-# 패키지 설치
+# 도커 패키지 설치
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-ce-rootless-extras passt
 #=====================
