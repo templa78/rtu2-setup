@@ -8,22 +8,21 @@ if [[ "$EUID" -ne 0 ]]; then
   exit 1
 fi
 
-source /rtu/.info
-RTU_VPN_IP="${IP}"
-RTU_VPN_KEY=$(wg genkey)
+source /rtu/.env/info
+VPN_KEY=$(wg genkey)
 
 #############
 # WireGuard #
 #############
 mkdir -p /etc/wireguard
-printf "${RTU_VPN_KEY}" > /etc/wireguard/rtu.key
-printf "${RTU_VPN_KEY}" | wg pubkey > /etc/wireguard/rtu.pub
+printf "${VPN_KEY}" > /etc/wireguard/rtu.key
+printf "${VPN_KEY}" | wg pubkey > /etc/wireguard/rtu.pub
 
 cat > /etc/wireguard/wg0.conf <<EOF
 [Interface]
-Address = ${RTU_VPN_IP}/16
+Address = ${VPN_IP}/16
 ListenPort = 51820
-PrivateKey = ${RTU_VPN_KEY}
+PrivateKey = ${VPN_KEY}
 
 [Peer]
 PublicKey = fQY2//jNlV80683/TYDTA2XXWKZISi638iSKAPKPpEw=
@@ -40,7 +39,7 @@ echo ""
 echo "##################################################"
 echo "이제 vpn 서버에서 아래 명령을 실행하세요."
 echo "--------------------------------------------------"
-echo "wg-add ${RTU_VPN_IP}/32 $(cat /etc/wireguard/rtu.pub)"
+echo "wg-add ${VPN_IP}/32 $(cat /etc/wireguard/rtu.pub)"
 echo "wg-sync"
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 

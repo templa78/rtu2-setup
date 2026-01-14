@@ -29,13 +29,26 @@ fi
 RTU_ID=$1
 VPN_IP=$2
 
-mkdir -p /rtu
-cat > /rtu/.info <<EOF
+mkdir -p /rtu/.env
+cat > /rtu/.env/info <<EOF
 DOMAIN=kpx
-ID=${RTU_ID}
-IP=${VPN_IP}
+RTU_ID=${RTU_ID}
+VPN_IP=${VPN_IP}
 EOF
-chmod 400 /rtu/.info
+chmod 400 /rtu/.env/info
+cat > /rtu/.env/arch <<EOF
+OS=raspbian
+OS_VERSION=10
+KERNEL=4.19
+KERNELV=4.19.97-v7l+
+ARCH=armv7l
+EOF
+chmod 400 /rtu/.env/arch
+
+cat > /etc/hosts <<EOF
+127.0.0.1    localhost
+127.0.1.1    raspberrypi
+EOF
 
 # security option
 rm -f /etc/hosts.allow

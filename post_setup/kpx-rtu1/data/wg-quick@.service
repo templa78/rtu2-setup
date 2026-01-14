@@ -1,11 +1,14 @@
 [Unit]
 Description=WireGuard via wireguard-go for %I
+After=network.target
+StartLimitIntervalSec=0
+StartLimitBurst=0
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
-Environment=ENV_WG_PROCESS_FOREGROUND=1
-ExecStart=/usr/local/sbin/wg-up %i
+Type=simple
+Restart=on-failure
+RestartSec=10s
+ExecStart=/bin/bash -c "/usr/local/sbin/wg-up %i && sleep infinity"
 ExecStop=/usr/local/sbin/wg-down %i
 
 [Install]

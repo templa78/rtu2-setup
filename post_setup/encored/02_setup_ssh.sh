@@ -8,7 +8,8 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-source /rtu/.info
+VPN_CLASS=10.123
+source /rtu/.env/info
 
 # 로그인 하기전에 다음 위치에 파일을 갖다 놓아야 한다. (나중에는 api로)
 if [[ ! -f /etc/ssh/rtu-ca.pub ]]; then
@@ -18,7 +19,7 @@ if [[ ! -f /etc/ssh/rtu-ca.pub ]]; then
   echo "##################################################"
   echo "먼저 auth 서버에서 다음 명령으로 생성한 후 복사한다."
   echo "--------------------------------------------------"
-  echo "gen_rtu ${ID}"
+  echo "gen_rtu ${RTU_ID}"
   echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 
   exit 1
@@ -69,6 +70,13 @@ Restart=on-failure
 RestartSec=5s
 StartLimitIntervalSec=0
 StartLimitBurst=0
+ExecStartPost=/bin/bash -c '\
+  sleep 3; \
+  for i in $(seq 1 60); do \
+    ping -c1 -W1 ${VPN_CLASS}.255.1 >/dev/null 2>&1 && exit 0; \
+    sleep 1; \
+  done; \
+  exit 1'
 EOF
 
 systemctl restart ssh
@@ -79,6 +87,6 @@ echo ""
 echo "##################################################"
 echo "russh 서버에서 아래 명령을 실행하여 접속 테스트"
 echo "--------------------------------------------------"
-echo "russh ${ID} rtu ${IP}"
+echo "russh ${RTU_ID} rtu ${VPN_IP}"
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 

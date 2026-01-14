@@ -17,13 +17,21 @@ fi
 RTU_ID=$1
 VPN_IP=$2
 
-mkdir -p /rtu
-cat > /rtu/.info <<EOF
+mkdir -p /rtu/.env
+cat > /rtu/.env/info <<EOF
 DOMAIN=encored
-ID=${RTU_ID}
-IP=${VPN_IP}
+RTU_ID=${RTU_ID}
+VPN_IP=${VPN_IP}
 EOF
-chmod 400 /rtu/.info
+chmod 400 /rtu/.env/info
+cat > /rtu/.env/arch <<EOF
+OS=ubuntu
+OS_VERSION=24.04.3
+KERNEL=6.1
+KERNELV=6.1.119-rt45
+ARCH=armv8-a
+EOF
+chmod 400 /rtu/.env/arch
 
 echo ""
 echo "!!!!! SUCCESS !!!!"

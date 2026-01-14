@@ -2,22 +2,19 @@
 
 set -euo pipefail
 
-TARGET_DIR=rootfs
-if [ $# -gt 0 ]; then
-    TARGET_DIR=$1
-fi
+echo "history 제거"
+rm -rf /home/*/.bash_history
+rm -rf /root/.bash_history
+rm -rf /*.usr-is-merged
 
-rm -rf ${TARGET_DIR}/home/*/.bash_history
-rm -rf ${TARGET_DIR}/root/.bash_history
-rm -rf ${TARGET_DIR}/*.usr-is-merged
+echo "cache 제거"
+rm -rf /var/cache
+rm -rf /var/crash
+rm -rf /var/log
+rm -rf /var/lib/dhcp
+rm -rf /var/lib/systemd/random-seed
 
-rm -rf ${TARGET_DIR}/var/cache
-rm -rf ${TARGET_DIR}/var/crash
-rm -rf ${TARGET_DIR}/var/log
-rm -rf ${TARGET_DIR}/var/lib/dhcp
-rm -rf ${TARGET_DIR}/var/lib/systemd/random-seed
-
-## 비밀번호 제거
+echo "비밀번호 제거"
 usermod -p '!' rtu
 usermod -p '!' iderms
 

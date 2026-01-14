@@ -37,7 +37,7 @@ EOF
 
 netfilter-persistent reload
 
-source /rtu/.info
+source /rtu/.env/info
 echo ""
 echo "!!!!! SUCCESS !!!!"
 echo ""
@@ -45,5 +45,5 @@ echo "##################################################"
 echo "russh 서버에서 아래 명령을 실행하여 다시 접속 테스트"
 echo "방화벽이 엄격하게 적용되었으므로 종료하기 전에 반드시 테스트"
 echo "--------------------------------------------------"
-echo "russh ${ID} pi"
+echo "russh ${RTU_ID} pi"
 echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"

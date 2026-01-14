@@ -3,29 +3,16 @@
 set -euo pipefail
 
 if [[ $# -eq 0 ]]; then
-  echo "usage: wg-up <ifname>"
+  echo "usage: wg-config <ifname>"
+  exit 1
 fi
 
 IF="$1"
 CONF="/etc/wireguard/${IF}.conf"
 SOCK="/run/wireguard/${IF}.sock"
 
-## 기존 장치 제거 (재시작 대비)
-ip link del dev "$IF" 2>/dev/null || true
-
-## wireguard-go 실행
-wg-go "$IF" >/dev/null 2>&1
-
-## socket 생성 기다리기
-sleep 1
-for i in $(seq 1 10); do
-  [[ -S "$SOCK" ]] && break
-  sleep 0.5
-done
-[[ -S "$SOCK" ]] || { echo "wg socket not created: $SOCK" >&2; exit 1; }
-
-## config 읽어오기
 declare -A CFG
+
 parse_conf() {
   local file="$1" line key val
   while IFS= read -r line || [[ -n "$line" ]]; do
@@ -56,34 +43,33 @@ parse_conf() {
     [[ -n "$key" ]] && CFG["$key"]="$val"
   done < "$file"
 }
+
 b64tohex() {
   local b64="${1:-}"
   [[ -n "$b64" ]] || return 1
   printf '%s' "$b64" | base64 -d 2>/dev/null | hexdump -v -e '/1 "%02x"'
 }
+
 parse_conf "$CONF"
 
 ADDR="${CFG[Address]:-}"
-LPORT="${CFG[ListenPort]:-51820}"
+LPORT="${CFG[ListenPort]:51820}"
 PRIV_B64="${CFG[PrivateKey]:-}"
 PUB_B64="${CFG[PublicKey]:-}"
 AIPS="${CFG[AllowedIPs]:-}"
 EP="${CFG[Endpoint]:-}"
-KA="${CFG[PersistentKeepalive]:-25}"
+KA="${CFG[PersistentKeepalive]:25}"
 
 # 필수값 검증
-[[ -n "$ADDR" ]] || { echo "Missing Interface.Address in $CONF" >&2; exit 1; }
-[[ -n "$LPORT" ]] || { echo "Missing Interface.ListenPort in $CONF" >&2; exit 1; }
-[[ -n "$PRIV_B64" ]] || { echo "Missing Interface.PrivateKey in $CONF" >&2; exit 1; }
-[[ -n "$PUB_B64" ]] || { echo "Missing Peer.PublicKey in $CONF" >&2; exit 1; }
-[[ -n "$AIPS" ]] || { echo "Missing Peer.AllowedIPs in $CONF" >&2; exit 1; }
-[[ -n "$EP" ]] || { echo "Missing Peer.Endpoint in $CONF" >&2; exit 1; }
-[[ -n "$KA" ]] || { echo "Missing Peer.PersistentKeepalive in $CONF" >&2; exit 1; }
+[[ -n "$ADDR" ]] || { echo "Missing Interface.Address in $CONF" >&2; exit 2; }
+[[ -n "$PRIV_B64" ]] || { echo "Missing Interface.PrivateKey in $CONF" >&2; exit 2; }
+[[ -n "$PUB_B64" ]] || { echo "Missing Peer.PublicKey in $CONF" >&2; exit 2; }
+[[ -n "$AIPS" ]] || { echo "Missing Peer.AllowedIPs in $CONF" >&2; exit 2; }
+[[ -n "$EP" ]] || { echo "Missing Peer.Endpoint in $CONF" >&2; exit 2; }
 
 PRIV_HEX="$(b64tohex "$PRIV_B64")"
 PUB_HEX="$(b64tohex "$PUB_B64")"
 
-## socket 으로 정보 넘기기
 cat <<EOF | sh -c "nc -U -q 0 \"$SOCK\""
 set=1
 private_key=$PRIV_HEX
@@ -97,20 +83,16 @@ allowed_ip=$AIPS
 
 EOF
 
-echo "==========="
-echo "[Interface]"
-echo "  Address = [$ADDR]"
-echo "  ListenPort = [$LPORT]"
-echo "  PrivateKey = [$PRIV_HEX]"
-echo "[Peer]"
-echo "  PublicKey = [$PUB_HEX]"
-echo "  AllowedIPs = [$AIPS]"
-echo "  Endpoint = [$EP]"
-echo "  PersistentKeepalive = [$KA]"
-echo "==========="
+echo "====="
+echo "ADDR = [$ADDR]"
+echo "LPORT = [$LPORT]"
+echo "PRIV_HEX = [$PRIV_HEX]"
+echo "PUB_HEX = [$PUB_HEX]"
+echo "END_PT = [$EP]"
+echo "AIPS = [$AIPS]"
+echo "KEEP_ALIVE = [$KA]"
+echo "====="
 
 ip link set "$IF" up
-ip addr add "$ADDR" dev "$IF" 2>/dev/null
-ip route add "$AIPS" dev "$IF" 2>/dev/null
-
-echo "...SUCCESS..."
+ip addr add "$ADDR" dev "$IF" 2>/dev/null || true
+ip route add "$AIPS" dev "$IF" 2>/dev/null || true
